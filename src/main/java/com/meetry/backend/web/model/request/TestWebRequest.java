@@ -1,0 +1,15 @@
+package com.meetry.backend.web.model.request;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TestWebRequest {
+    private String name;
+    private String className;
+}
