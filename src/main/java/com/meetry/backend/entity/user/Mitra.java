@@ -18,9 +18,6 @@ public class Mitra {
     @Id
     private String id;
 
-    @Field(value = "name")
-    private String name;
-
     @Field(value = "email")
     private String email;
 
@@ -28,5 +25,41 @@ public class Mitra {
     private String password;
 
     @Field(value = "role")
-    private Role role = Role.MITRA;
+    private Role role;
+
+    @Field
+    private String namaPerusahaan;
+
+    @Field
+    private String provinsi;
+
+    @Field
+    private String kabupaten;
+
+    @Field
+    private String alamatLengkap;
+
+    @Field
+    private String bidangPerusahaan;
+
+    @Field
+    private String jenisPerusahaan;
+
+    @Field
+    private String nomorTelepon;
+
+    @Field
+    private int tahunBerdiri;
+
+    @Field
+    private int jumlahKaryawan;
+
+    @Field
+    private String profilSingkat;
+
+    @Field
+    private String website;
+
+    @Field
+    private String fotoProfil;
 }

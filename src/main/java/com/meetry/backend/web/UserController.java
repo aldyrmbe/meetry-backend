@@ -3,8 +3,10 @@ package com.meetry.backend.web;
 import com.meetry.backend.aspect.annotation.Authenticated;
 import com.meetry.backend.command.CommandExecutor;
 import com.meetry.backend.command.LoginCommand;
+import com.meetry.backend.command.RegisterMitraCommand;
 import com.meetry.backend.command.RegisterPenelitiCommand;
 import com.meetry.backend.command.model.LoginCommandRequest;
+import com.meetry.backend.command.model.RegisterMitraCommandRequest;
 import com.meetry.backend.command.model.RegisterPenelitiCommandRequest;
 import com.meetry.backend.entity.Session;
 import com.meetry.backend.web.model.request.LoginWebRequest;
@@ -30,7 +32,7 @@ public class UserController {
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public BaseResponse register(
+    public BaseResponse registerPeneliti(
         @RequestPart("data") String data,
         @RequestPart(value = "fotoProfil", required = false) MultipartFile fotoProfil){
 
@@ -40,6 +42,24 @@ public class UserController {
             .build();
 
         return commandExecutor.execute(RegisterPenelitiCommand.class, commandRequest);
+    }
+
+    @RequestMapping(
+        method = RequestMethod.POST,
+        value = "/register/mitra",
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public BaseResponse registerMitra(
+        @RequestPart("data") String data,
+        @RequestPart(value = "fotoProfil", required = false) MultipartFile fotoProfil){
+
+        RegisterMitraCommandRequest commandRequest = RegisterMitraCommandRequest.builder()
+            .data(data)
+            .fotoProfil(fotoProfil)
+            .build();
+
+        return commandExecutor.execute(RegisterMitraCommand.class, commandRequest);
     }
 
     @RequestMapping(
