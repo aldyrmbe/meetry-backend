@@ -8,6 +8,8 @@ import com.meetry.backend.web.exception.BaseException;
 import com.meetry.backend.web.exception.UnauthorizedException;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -22,14 +24,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
 public class AuthHelperImpl implements AuthHelper {
 
-    private final RedisTemplate<String, String> redisTemplate;
-    private final ObjectMapper objectMapper;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private static final String SESSION_COOKIE_NAME = "meetry-session";
     private static final String REDIS_COOKIE_KEY = "meetry-session-%s";
     private static final int SEVEN_DAYS_IN_SECONDS = 7 * 24 * 60 * 60;
+
+    @Value("${cookie.domain}")
+    private String domain;
 
     @Override
     @SneakyThrows
@@ -65,7 +73,7 @@ public class AuthHelperImpl implements AuthHelper {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(SEVEN_DAYS_IN_SECONDS);
         cookie.setPath("/");
-        cookie.setDomain("localhost");
+        cookie.setDomain(domain);
         httpServletResponse.addCookie(cookie);
     }
 
