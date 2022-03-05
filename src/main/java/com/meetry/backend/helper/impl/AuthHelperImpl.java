@@ -36,6 +36,9 @@ public class AuthHelperImpl implements AuthHelper {
     private static final String REDIS_COOKIE_KEY = "meetry-session-%s";
     private static final int SEVEN_DAYS_IN_SECONDS = 7 * 24 * 60 * 60;
 
+    @Value("${cookie.domain}")
+    private String domain;
+
     @Override
     @SneakyThrows
     public Session getSessionFromCookie(HttpServletRequest httpServletRequest) {
@@ -70,7 +73,7 @@ public class AuthHelperImpl implements AuthHelper {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(SEVEN_DAYS_IN_SECONDS);
         cookie.setPath("/");
-        cookie.setDomain("meetry-frontend.vercel.app");
+        cookie.setDomain(domain);
         httpServletResponse.addCookie(cookie);
     }
 
