@@ -70,7 +70,7 @@ public class AuthHelperImpl implements AuthHelper {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(SEVEN_DAYS_IN_SECONDS);
         cookie.setPath("/");
-        cookie.setDomain("vercel.app");
+        cookie.setDomain("meetry-frontend.vercel.app");
         httpServletResponse.addCookie(cookie);
     }
 
