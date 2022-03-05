@@ -17,13 +17,8 @@ public class TestController {
 
     private final CommandExecutor commandExecutor;
 
-    @PostMapping(value = "/test")
-    public TestWebResponse test(@RequestBody TestWebRequest testWebRequest){
-        TestCommandRequest testCommandRequest = TestCommandRequest.builder()
-            .name(testWebRequest.getName())
-            .className(testWebRequest.getClassName())
-            .build();
-
-        return commandExecutor.execute(TestCommand.class, testCommandRequest);
+    @GetMapping(value = "/test")
+    public String test(){
+        return "String";
     }
 }
