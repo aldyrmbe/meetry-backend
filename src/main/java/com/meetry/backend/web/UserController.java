@@ -1,22 +1,20 @@
 package com.meetry.backend.web;
 
 import com.meetry.backend.aspect.annotation.Authenticated;
-import com.meetry.backend.command.CommandExecutor;
-import com.meetry.backend.command.LoginCommand;
-import com.meetry.backend.command.RegisterMitraCommand;
-import com.meetry.backend.command.RegisterPenelitiCommand;
-import com.meetry.backend.command.model.LoginCommandRequest;
-import com.meetry.backend.command.model.RegisterMitraCommandRequest;
-import com.meetry.backend.command.model.RegisterPenelitiCommandRequest;
+import com.meetry.backend.command.*;
+import com.meetry.backend.command.model.*;
 import com.meetry.backend.entity.Session;
+import com.meetry.backend.helper.AuthHelper;
 import com.meetry.backend.web.model.request.LoginWebRequest;
 import com.meetry.backend.web.model.response.BaseResponse;
 import com.meetry.backend.web.model.response.LoginWebResponse;
+import com.meetry.backend.web.model.response.UserWebResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
@@ -25,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 public class UserController {
 
     private final CommandExecutor commandExecutor;
+    private final AuthHelper authHelper;
 
     @RequestMapping(
         method = RequestMethod.POST,
@@ -76,5 +75,35 @@ public class UserController {
             .build();
 
         return commandExecutor.execute(LoginCommand.class, commandRequest);
+    }
+
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = ""
+    )
+    @Authenticated
+    public UserWebResponse getCurrentLoggedInUser(HttpServletRequest httpServletRequest){
+
+        Session session = authHelper.getSessionFromCookie(httpServletRequest);
+        GetCurrentLoggedInUserCommandRequest commandRequest = GetCurrentLoggedInUserCommandRequest.builder()
+            .session(session)
+            .build();
+
+        return commandExecutor.execute(GetCurrentLoggedInUserCommand.class, commandRequest);
+    }
+
+    @RequestMapping(
+        method = RequestMethod.POST,
+        value = "/logout"
+    )
+    @Authenticated
+    public BaseResponse logOut(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse){
+
+        LogOutCommandRequest commandRequest = LogOutCommandRequest.builder()
+            .httpServletRequest(httpServletRequest)
+            .httpServletResponse(httpServletResponse)
+            .build();
+
+        return commandExecutor.execute(LogOutCommand.class, commandRequest);
     }
 }

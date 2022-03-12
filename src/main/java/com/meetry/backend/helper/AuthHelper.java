@@ -9,4 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 public interface AuthHelper {
     Session getSessionFromCookie(HttpServletRequest httpServletRequest);
     void setSessionCookie(HttpServletResponse httpServletResponse, String id, Role role);
+    void authenticate(HttpServletRequest httpServletRequest, Role authorizedRole);
+    void destroyCandidateSession(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
 }

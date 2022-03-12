@@ -1,14 +1,18 @@
 package com.meetry.backend.aspect;
 
-import com.meetry.backend.entity.Session;
+import com.meetry.backend.aspect.annotation.Authenticated;
 import com.meetry.backend.entity.constant.Role;
 import com.meetry.backend.helper.AuthHelper;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.ModelAttribute;
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
 
 @Aspect
 @Component
@@ -19,7 +23,19 @@ public class AuthenticatedInterceptor {
 
     @Around("@annotation(com.meetry.backend.aspect.annotation.Authenticated)")
     public Object authenticate(ProceedingJoinPoint proceedingJoinPoint) throws Throwable{
+        HttpServletRequest httpServletRequest = (HttpServletRequest) proceedingJoinPoint.getArgs()[0];
+        Role role = getAnnotationValue(proceedingJoinPoint);
+        authHelper.authenticate(httpServletRequest, role);
         return proceedingJoinPoint.proceed();
+    }
+
+    private Role getAnnotationValue(ProceedingJoinPoint joinPoint) {
+
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+
+        Authenticated authenticated = method.getAnnotation(Authenticated.class);
+        return authenticated.value();
     }
 
 }
