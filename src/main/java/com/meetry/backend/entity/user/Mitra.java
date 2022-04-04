@@ -9,6 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -40,7 +42,7 @@ public class Mitra {
     private String alamatLengkap;
 
     @Field
-    private String bidangPerusahaan;
+    private List<String> bidangPerusahaan;
 
     @Field
     private String jenisPerusahaan;

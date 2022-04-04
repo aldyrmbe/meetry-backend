@@ -14,7 +14,7 @@ public class GetCurrentLoggedInUserCommandImpl implements GetCurrentLoggedInUser
 
     @Override
     public UserWebResponse execute(GetCurrentLoggedInUserCommandRequest commandRequest) {
-
+        System.out.println("called");
         Session session = commandRequest.getSession();
         return UserWebResponse.builder()
             .id(session.getId())

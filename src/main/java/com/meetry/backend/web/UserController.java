@@ -4,7 +4,10 @@ import com.meetry.backend.aspect.annotation.Authenticated;
 import com.meetry.backend.command.*;
 import com.meetry.backend.command.model.*;
 import com.meetry.backend.entity.Session;
+import com.meetry.backend.entity.constant.Role;
+import com.meetry.backend.entity.user.ERIC;
 import com.meetry.backend.helper.AuthHelper;
+import com.meetry.backend.repository.user.ERICRepository;
 import com.meetry.backend.web.model.request.LoginWebRequest;
 import com.meetry.backend.web.model.response.BaseResponse;
 import com.meetry.backend.web.model.response.LoginWebResponse;
@@ -24,6 +27,7 @@ public class UserController {
 
     private final CommandExecutor commandExecutor;
     private final AuthHelper authHelper;
+    private final ERICRepository ericRepository;
 
     @RequestMapping(
         method = RequestMethod.POST,
@@ -105,5 +109,26 @@ public class UserController {
             .build();
 
         return commandExecutor.execute(LogOutCommand.class, commandRequest);
+    }
+
+    @RequestMapping(
+        method = RequestMethod.POST,
+        value = "/addERIC"
+    )
+    public BaseResponse addERIC(){
+
+        ERIC eric = ERIC.builder()
+            .email("eric@ugm.ac.id")
+            .password("$2a$10$U00LEfuL9drVgdCHLooOBeYuABqZ1mkR7a33HeaD8uM4PrtzXkrNS")
+            .role(Role.ERIC)
+            .build();
+
+        ericRepository.save(eric);
+
+        return BaseResponse.builder()
+            .code(200)
+            .status("OK")
+            .message("ERIC didaftarkan")
+            .build();
     }
 }

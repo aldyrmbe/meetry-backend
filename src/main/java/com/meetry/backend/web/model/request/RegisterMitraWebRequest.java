@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,7 +18,7 @@ public class RegisterMitraWebRequest {
     private String provinsi;
     private String kabupaten;
     private String alamatLengkap;
-    private String bidangPerusahaan;
+    private List<String> bidangPerusahaan;
     private String jenisPerusahaan;
     private String nomorTelepon;
     private int tahunBerdiri;
