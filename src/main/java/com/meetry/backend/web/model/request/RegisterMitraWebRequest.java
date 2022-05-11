@@ -15,14 +15,10 @@ public class RegisterMitraWebRequest {
     private String namaPerusahaan;
     private String email;
     private String password;
-    private String provinsi;
-    private String kabupaten;
-    private String alamatLengkap;
-    private List<String> bidangPerusahaan;
     private String jenisPerusahaan;
+    private List<String> bidangPerusahaan;
     private String nomorTelepon;
-    private int tahunBerdiri;
-    private int jumlahKaryawan;
+    private String alamat;
     private String profilSingkat;
     private String website;
 }

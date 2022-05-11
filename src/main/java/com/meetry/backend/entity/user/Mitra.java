@@ -20,41 +20,28 @@ public class Mitra {
     @Id
     private String id;
 
-    @Field(value = "email")
-    private String email;
-
-    @Field(value = "password")
-    private String password;
-
-    @Field(value = "role")
     private Role role;
 
     @Field
     private String namaPerusahaan;
 
     @Field
-    private String provinsi;
+    private String email;
 
     @Field
-    private String kabupaten;
-
-    @Field
-    private String alamatLengkap;
-
-    @Field
-    private List<String> bidangPerusahaan;
+    private String password;
 
     @Field
     private String jenisPerusahaan;
 
     @Field
+    private List<String> bidangPerusahaan;
+
+    @Field
     private String nomorTelepon;
 
     @Field
-    private int tahunBerdiri;
-
-    @Field
-    private int jumlahKaryawan;
+    private String alamat;
 
     @Field
     private String profilSingkat;

@@ -9,5 +9,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface Authenticated {
-    Role value() default Role.ALL;
+
+  Role[] value() default {Role.PENELITI, Role.MITRA, Role.ACCOUNT_OFFICER, Role.ERIC};
 }

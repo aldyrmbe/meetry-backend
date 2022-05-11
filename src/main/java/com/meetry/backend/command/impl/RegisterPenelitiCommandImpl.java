@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @Component
 @AllArgsConstructor
@@ -72,8 +71,7 @@ public class RegisterPenelitiCommandImpl implements RegisterPenelitiCommand {
             .tanggalLahir(request.getTanggalLahir())
             .nomorTelepon(request.getNomorTelepon())
             .alamatLengkap(request.getAlamatLengkap())
-            .bioSingkat(request.getBioSingkat())
-            .website(Optional.ofNullable(request.getWebsite()).orElse(""))
+            .acadstaffLink(request.getAcadstaffLink())
             .build();
     }
 

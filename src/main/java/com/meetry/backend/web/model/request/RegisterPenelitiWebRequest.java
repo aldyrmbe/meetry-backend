@@ -22,6 +22,5 @@ public class RegisterPenelitiWebRequest {
     private Long tanggalLahir;
     private String nomorTelepon;
     private String alamatLengkap;
-    private String bioSingkat;
-    private String website;
+    private String acadstaffLink;
 }

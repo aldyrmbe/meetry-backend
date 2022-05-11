@@ -3,7 +3,14 @@ package com.meetry.backend.helper.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meetry.backend.entity.Session;
 import com.meetry.backend.entity.constant.Role;
+import com.meetry.backend.entity.folder.Folder;
+import com.meetry.backend.entity.proyek.Proyek;
+import com.meetry.backend.entity.subfolder.SubFolder;
 import com.meetry.backend.helper.AuthHelper;
+import com.meetry.backend.helper.ProyekHelper;
+import com.meetry.backend.repository.FolderRepository;
+import com.meetry.backend.repository.SubFolderRepository;
+import com.meetry.backend.web.exception.BaseException;
 import com.meetry.backend.web.exception.UnauthorizedException;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +22,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -30,6 +34,15 @@ public class AuthHelperImpl implements AuthHelper {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private SubFolderRepository subFolderRepository;
+
+    @Autowired
+    private FolderRepository folderRepository;
+
+    @Autowired
+    private ProyekHelper proyekHelper;
 
     private static final String SESSION_COOKIE_NAME = "meetry-session";
     private static final String REDIS_COOKIE_KEY = "meetry-session-%s";
@@ -66,23 +79,14 @@ public class AuthHelperImpl implements AuthHelper {
     }
 
     @Override
-    public void authenticate(HttpServletRequest httpServletRequest, Role authorizedRole) {
+    public void authenticate(HttpServletRequest httpServletRequest, List<Role> authorizedRole) {
 
         Role requestedRole = getSessionFromCookie(httpServletRequest).getRole();
         String sessionCookieValue = getSessionValueFromCookie(httpServletRequest);
         String redisValue = getSessionFromRedis(sessionCookieValue);
 
-        if(Role.PENELITI.equals(authorizedRole)){
-            authenticatePeneliti(sessionCookieValue, redisValue, requestedRole);
-        } else if(Role.MITRA.equals(authorizedRole)){
-            authenticateMitra(sessionCookieValue, redisValue, requestedRole);
-        } else if(Role.ERIC.equals(authorizedRole)){
-            authenticateERIC(sessionCookieValue, redisValue, requestedRole);
-        } else if(Role.ACCOUNT_OFFICER.equals(authorizedRole)){
-            authenticateAccountOfficer(sessionCookieValue, redisValue, requestedRole);
-        } else {
-            authenticateAll(sessionCookieValue, redisValue);
-        }
+        if(!sessionCookieValue.equals(redisValue) || !authorizedRole.contains(requestedRole))
+            throw new UnauthorizedException();
     }
 
     @Override
@@ -97,6 +101,38 @@ public class AuthHelperImpl implements AuthHelper {
         httpServletResponse.addCookie(cookie);
     }
 
+    @Override
+    public void checkAccountOfficerAuthorization(Session session, Proyek proyek) {
+        
+      if (Role.ACCOUNT_OFFICER.equals(session.getRole()) && !proyek.getPartisipan()
+          .getAccountOfficer()
+          .equals(session.getId())) {
+        throw new UnauthorizedException();
+      }
+    }
+
+    @Override
+    public void checkUserAuthorizationForLogbooks(Session session, String proyekId, String subFolderId) {
+
+        SubFolder subFolder = subFolderRepository.findById(subFolderId)
+            .orElseThrow(() -> new BaseException("Subfolder tidak ditemukan"));
+
+        Folder folder = folderRepository.findById(subFolder.getFolderId())
+            .orElseThrow(() -> new BaseException("Folder tidak ditemukan"));
+
+        Proyek proyek = proyekHelper.findProyekById(folder.getProyekId());
+
+        List<String> partisipan = new ArrayList<>();
+        partisipan.addAll(proyek.getPartisipan().getMitra());
+        partisipan.addAll(proyek.getPartisipan().getPeneliti());
+        partisipan.add(proyek.getPartisipan().getAccountOfficer());
+
+        if(!Role.ERIC.equals(session.getRole())){
+            if(!partisipan.contains(session.getId()))
+                throw new UnauthorizedException();
+        }
+    }
+
     private Cookie constructCookie(String value, int maxAge){
 
         Cookie cookie = new Cookie(SESSION_COOKIE_NAME, value);
@@ -105,36 +141,6 @@ public class AuthHelperImpl implements AuthHelper {
         cookie.setPath("/");
         cookie.setDomain(domain);
         return cookie;
-    }
-
-    private void authenticatePeneliti(String sessionCookieValue, String redisValue, Role requestedRole){
-
-        if(!sessionCookieValue.equals(redisValue) || !Role.PENELITI.equals(requestedRole))
-            throw new UnauthorizedException();
-    }
-
-    private void authenticateMitra(String sessionCookieValue, String redisValue, Role requestedRole){
-
-        if(!sessionCookieValue.equals(redisValue) || !Role.MITRA.equals(requestedRole))
-            throw new UnauthorizedException();
-    }
-
-    private void authenticateERIC(String sessionCookieValue, String redisValue, Role requestedRole){
-
-        if(!sessionCookieValue.equals(redisValue) || !Role.ERIC.equals(requestedRole))
-            throw new UnauthorizedException();
-    }
-
-    private void authenticateAccountOfficer(String sessionCookieValue, String redisValue, Role requestedRole){
-
-        if(!sessionCookieValue.equals(redisValue) || !Role.ACCOUNT_OFFICER.equals(requestedRole))
-            throw new UnauthorizedException();
-    }
-
-    private void authenticateAll(String sessionCookieValue, String redisValue){
-
-        if(!sessionCookieValue.equals(redisValue))
-            throw new UnauthorizedException();
     }
 
     @SneakyThrows
