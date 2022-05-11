@@ -80,7 +80,6 @@ public class ActivateProyekCommandImpl implements ActivateProyekCommand {
     return Arrays.stream(files)
         .map(file -> {
           GoFileUploadResponse response = clientHelper.uploadFile(file);
-          System.out.println(response);
           return DokumenPendukung.builder()
               .nama(response.getData()
                   .getFileName())

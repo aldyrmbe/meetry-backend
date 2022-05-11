@@ -223,7 +223,6 @@ public class ProyekController {
   public DefaultResponse<List<GetUniversitiesByNameWebResponse>> getUniversitiesByName(
       @RequestParam("query") String query) {
 
-    System.out.println("called");
     GetUniversitiesByNameCommandRequest commandRequest = GetUniversitiesByNameCommandRequest.builder()
         .query(query)
         .build();

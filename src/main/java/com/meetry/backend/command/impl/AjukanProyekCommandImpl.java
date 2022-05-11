@@ -60,7 +60,6 @@ public class AjukanProyekCommandImpl implements AjukanProyekCommand {
     return multipartFiles.stream()
         .map(file -> {
           GoFileUploadResponse response = clientHelper.uploadFile(file);
-          System.out.println(response);
           return DokumenPendukung.builder()
               .nama(response.getData()
                   .getFileName())
