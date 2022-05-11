@@ -18,15 +18,18 @@ public class AccountOfficer {
     @Id
     private String id;
 
-    @Field(value = "name")
+    @Field
     private String name;
 
-    @Field(value = "email")
+    @Field
     private String email;
 
-    @Field(value = "password")
+    @Field
     private String password;
 
-    @Field(value = "role")
-    private Role role = Role.ACCOUNT_OFFICER;
+    @Field
+    private String profilePhoto;
+
+    @Field
+    private Role role;
 }

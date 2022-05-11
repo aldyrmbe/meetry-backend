@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 @Aspect
 @Component
@@ -24,18 +26,18 @@ public class AuthenticatedInterceptor {
     @Around("@annotation(com.meetry.backend.aspect.annotation.Authenticated)")
     public Object authenticate(ProceedingJoinPoint proceedingJoinPoint) throws Throwable{
         HttpServletRequest httpServletRequest = (HttpServletRequest) proceedingJoinPoint.getArgs()[0];
-        Role role = getAnnotationValue(proceedingJoinPoint);
+        List<Role> role = getAnnotationValue(proceedingJoinPoint);
         authHelper.authenticate(httpServletRequest, role);
         return proceedingJoinPoint.proceed();
     }
 
-    private Role getAnnotationValue(ProceedingJoinPoint joinPoint) {
+    private List<Role> getAnnotationValue(ProceedingJoinPoint joinPoint) {
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
         Authenticated authenticated = method.getAnnotation(Authenticated.class);
-        return authenticated.value();
+        return Arrays.asList(authenticated.value());
     }
 
 }
