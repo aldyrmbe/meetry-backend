@@ -42,6 +42,7 @@ public class GetPenelitiProfileCommandImpl implements GetPenelitiProfileCommand 
         .programStudi(peneliti.getProgramStudi())
         .email(peneliti.getEmail())
         .profileUrl(peneliti.getAcadstaffLink())
+        .fotoProfil(peneliti.getFotoProfil())
         .build();
 
   }

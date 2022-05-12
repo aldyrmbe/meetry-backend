@@ -15,4 +15,5 @@ public class GetPenelitiProfileWebResponse {
     private String programStudi;
     private String email;
     private String profileUrl;
+    private String fotoProfil;
 }
