@@ -3,8 +3,10 @@ package com.meetry.backend.repository.impl;
 import com.meetry.backend.entity.Session;
 import com.meetry.backend.entity.constant.Role;
 import com.meetry.backend.entity.constant.StatusProyek;
+import com.meetry.backend.entity.proyek.File;
 import com.meetry.backend.entity.proyek.Proyek;
 import com.meetry.backend.repository.ProyekRepositoryCustom;
+import com.mongodb.client.result.UpdateResult;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,9 +15,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Objects;
 
 @Repository
@@ -105,5 +109,18 @@ public class ProyekRepositoryImpl implements ProyekRepositoryCustom {
 
     return PageableExecutionUtils.getPage(mongoTemplate.find(query, Proyek.class), pageable,
         () -> mongoTemplate.count(countQuery, Proyek.class));
+  }
+
+  @Override
+  public void saveFiles(String proyekId, List<File> files) {
+    Query query = new Query();
+    Criteria criteria = Criteria.where("_id").is(proyekId);
+    query.addCriteria(criteria);
+
+    Update filesToUpdate = new Update();
+    filesToUpdate.push("files").each(files.toArray());
+
+    UpdateResult updateResult = mongoTemplate.updateFirst(query, filesToUpdate, Proyek.class);
+    System.out.println(updateResult.wasAcknowledged());
   }
 }

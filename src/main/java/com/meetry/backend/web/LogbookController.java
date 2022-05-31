@@ -11,6 +11,7 @@ import com.meetry.backend.web.model.request.AddLogbookWebRequest;
 import com.meetry.backend.web.model.response.*;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -124,7 +125,8 @@ public class LogbookController {
       @PathVariable("proyekId") String proyekId,
       @PathVariable("subFolderId") String subFolderId,
       @PathVariable("logbookId") String logbookId,
-      @RequestBody AddCommentWebRequest webRequest) {
+      @RequestPart(value="content") String content,
+      @RequestPart(value = "files", required = false) MultipartFile[] files) {
 
     Session session = authHelper.getSessionFromCookie(httpServletRequest);
 
@@ -133,9 +135,13 @@ public class LogbookController {
         .proyekId(proyekId)
         .subFolderId(subFolderId)
         .logbookId(logbookId)
-        .content(webRequest.getContent())
+        .content(content)
+        .files(files)
         .build();
 
+    System.out.println(proyekId);
+    System.out.println(subFolderId);
+    System.out.println(logbookId);
     return commandExecutor.execute(AddCommentCommand.class, commandRequest);
   }
 

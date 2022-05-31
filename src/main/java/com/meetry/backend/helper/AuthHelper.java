@@ -15,4 +15,5 @@ public interface AuthHelper {
     void destroyCandidateSession(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
     void checkAccountOfficerAuthorization(Session session, Proyek proyek);
     void checkUserAuthorizationForLogbooks(Session session, String proyekId, String subFolderId);
+    void checkUserAuthorizationForProyekFiles(Session session, String proyekId);
 }

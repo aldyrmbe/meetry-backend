@@ -1,5 +1,6 @@
 package com.meetry.backend.helper.impl;
 
+import com.meetry.backend.entity.HasNewNotification;
 import com.meetry.backend.entity.constant.NotificationConstant;
 import com.meetry.backend.entity.constant.Role;
 import com.meetry.backend.entity.notifikasi.Notifikasi;
@@ -8,16 +9,20 @@ import com.meetry.backend.entity.user.Mitra;
 import com.meetry.backend.entity.user.Peneliti;
 import com.meetry.backend.helper.NotificationHelper;
 import com.meetry.backend.helper.ProyekHelper;
+import com.meetry.backend.repository.HasNewNotificationRepository;
 import com.meetry.backend.repository.NotificationRepository;
 import com.meetry.backend.repository.user.AccountOfficerRepository;
 import com.meetry.backend.repository.user.MitraRepository;
 import com.meetry.backend.repository.user.PenelitiRepository;
+import com.meetry.backend.web.model.request.RealtimeNotificationWebSocketPayload;
 import lombok.AllArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -33,6 +38,10 @@ public class NotificationHelperImpl implements NotificationHelper {
 
   private final ProyekHelper proyekHelper;
 
+  private final SimpMessagingTemplate simpMessagingTemplate;
+
+  private final HasNewNotificationRepository hasNewNotificationRepository;
+
   @Override
   public void sendNotificationForProyekOnDiscussion(Proyek proyek) {
 
@@ -40,9 +49,16 @@ public class NotificationHelperImpl implements NotificationHelper {
     String accountOfficerName = getAccountOfficerName(proyek.getPartisipan()
         .getAccountOfficer());
 
+    List<String> penelitiIds = proyek.getPartisipan()
+        .getPeneliti();
+    List<String> mitraIds = proyek.getPartisipan()
+        .getMitra();
+    List<String> receiverIds = Stream.of(penelitiIds, mitraIds)
+        .flatMap(Collection::stream)
+        .collect(Collectors.toList());
+
     if (Role.PENELITI.equals(proyek.getPemohon())) {
-      String mitraNames = getMitraNames(proyek.getPartisipan()
-          .getMitra());
+      String mitraNames = getMitraNames(mitraIds);
 
       Notifikasi notifikasi = Notifikasi.builder()
           .receiver(Collections.singletonList(proyek.getPartisipan()
@@ -59,8 +75,7 @@ public class NotificationHelperImpl implements NotificationHelper {
     }
 
     if (Role.MITRA.equals(proyek.getPemohon())) {
-      String penelitiNames = getPenelitiNames(proyek.getPartisipan()
-          .getPeneliti());
+      String penelitiNames = getPenelitiNames(penelitiIds);
 
       Notifikasi notifikasi = Notifikasi.builder()
           .receiver(Collections.singletonList(proyek.getPartisipan()
@@ -75,6 +90,7 @@ public class NotificationHelperImpl implements NotificationHelper {
 
       notificationRepository.save(notifikasi);
     }
+    updateRealtimeNotification(receiverIds);
   }
 
   @Override
@@ -84,7 +100,11 @@ public class NotificationHelperImpl implements NotificationHelper {
         .getPeneliti();
     List<String> mitraIds = proyek.getPartisipan()
         .getMitra();
-    Long createdAt = Instant.now().toEpochMilli();
+    List<String> receiverIds = Stream.of(penelitiIds, mitraIds)
+        .flatMap(Collection::stream)
+        .collect(Collectors.toList());
+    Long createdAt = Instant.now()
+        .toEpochMilli();
     String judulProyek = proyek.getJudulProyek();
 
     Notifikasi notifikasiForPeneliti = Notifikasi.builder()
@@ -102,6 +122,7 @@ public class NotificationHelperImpl implements NotificationHelper {
         .build();
 
     notificationRepository.saveAll(Arrays.asList(notifikasiForPeneliti, notifikasiForMitra));
+    updateRealtimeNotification(receiverIds);
   }
 
   private String getAccountOfficerName(String accountOfficerId) {
@@ -141,10 +162,14 @@ public class NotificationHelperImpl implements NotificationHelper {
 
   @Override
   public void sendNotificationForClosingProyek(Proyek proyek) {
+
     List<String> receiverIds = new ArrayList<>();
-    receiverIds.addAll(proyek.getPartisipan().getPeneliti());
-    receiverIds.addAll(proyek.getPartisipan().getMitra());
-    Long createdAt = Instant.now().toEpochMilli();
+    receiverIds.addAll(proyek.getPartisipan()
+        .getPeneliti());
+    receiverIds.addAll(proyek.getPartisipan()
+        .getMitra());
+    Long createdAt = Instant.now()
+        .toEpochMilli();
     String judulProyek = proyek.getJudulProyek();
 
     Notifikasi notifikasi = Notifikasi.builder()
@@ -155,5 +180,30 @@ public class NotificationHelperImpl implements NotificationHelper {
         .build();
 
     notificationRepository.save(notifikasi);
+    updateRealtimeNotification(receiverIds);
+  }
+
+  private void updateRealtimeNotification(List<String> userIds) {
+
+    userIds.forEach(userId -> {
+      updateRealtimeNotification(userId);
+      updateHasNewNotification(userId);
+    });
+  }
+
+  private void updateRealtimeNotification(String userId) {
+
+    RealtimeNotificationWebSocketPayload payload = new RealtimeNotificationWebSocketPayload(true);
+    simpMessagingTemplate.convertAndSend("/notification/" + userId, payload);
+  }
+
+  private void updateHasNewNotification(String userId) {
+
+    HasNewNotification hasNewNotification = HasNewNotification.builder()
+        .userId(userId)
+        .hasNewNotification(true)
+        .build();
+
+    hasNewNotificationRepository.save(hasNewNotification);
   }
 }

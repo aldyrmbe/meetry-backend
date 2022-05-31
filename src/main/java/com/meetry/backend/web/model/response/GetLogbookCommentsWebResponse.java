@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -14,4 +16,14 @@ public class GetLogbookCommentsWebResponse {
     private String pengirim;
     private Long waktu;
     private String isi;
+    private List<File> files;
+    
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class File {
+        private String fileName;
+        private String fileUrl;
+    }
 }

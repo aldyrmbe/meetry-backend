@@ -2,6 +2,7 @@ package com.meetry.backend.command.impl;
 
 import com.meetry.backend.command.GetLogbookCommentsCommand;
 import com.meetry.backend.command.model.GetLogbookCommentsCommandRequest;
+import com.meetry.backend.entity.komentar.File;
 import com.meetry.backend.entity.komentar.Komentar;
 import com.meetry.backend.helper.AuthHelper;
 import com.meetry.backend.repository.KomentarRepository;
@@ -11,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -49,6 +51,20 @@ public class GetLogbookCommentsCommandImpl implements GetLogbookCommentsCommand 
             .pengirim(comment.getSenderName())
             .waktu(comment.getCreatedAt())
             .isi(comment.getContent())
+            .files(getFiles(comment.getFiles()))
+            .build())
+        .collect(Collectors.toList());
+  }
+
+  private List<GetLogbookCommentsWebResponse.File> getFiles(List<File> files){
+    if(Objects.isNull(files)){
+      return null;
+    }
+
+    return files.stream()
+        .map(file -> GetLogbookCommentsWebResponse.File.builder()
+            .fileName(file.getName())
+            .fileUrl(file.getUrl())
             .build())
         .collect(Collectors.toList());
   }

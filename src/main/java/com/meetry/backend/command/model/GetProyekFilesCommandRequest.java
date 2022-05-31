@@ -5,17 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class AddCommentCommandRequest {
+@NoArgsConstructor
+public class GetProyekFilesCommandRequest {
     private Session session;
     private String proyekId;
-    private String subFolderId;
-    private String logbookId;
-    private String content;
-    private MultipartFile[] files;
 }

@@ -202,6 +202,7 @@ public class ProyekController {
       @RequestParam("pemohon") Role pemohon,
       @RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery,
       @RequestParam(value = "page", defaultValue = "0") int page) {
+
     GetListProyekOnRequestCommandRequest commandRequest = GetListProyekOnRequestCommandRequest.builder()
         .pemohon(pemohon)
         .searchQuery(searchQuery)
@@ -228,6 +229,21 @@ public class ProyekController {
         .build();
 
     return commandExecutor.execute(GetUniversitiesByNameCommand.class, commandRequest);
+  }
+
+  @Authenticated
+  @RequestMapping(method = RequestMethod.GET, value = "/{proyekId}/files")
+  public DefaultResponse<List<GetProyekFilesWebResponse>> getProyekFiles(HttpServletRequest httpServletRequest,
+      @PathVariable("proyekId") String proyekId) {
+
+    Session session = authHelper.getSessionFromCookie(httpServletRequest);
+
+    GetProyekFilesCommandRequest commandRequest = GetProyekFilesCommandRequest.builder()
+        .session(session)
+        .proyekId(proyekId)
+        .build();
+
+    return commandExecutor.execute(GetProyekFilesCommand.class, commandRequest);
   }
 
 }

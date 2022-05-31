@@ -122,6 +122,18 @@ public class AuthHelperImpl implements AuthHelper {
 
         Proyek proyek = proyekHelper.findProyekById(folder.getProyekId());
 
+        verifyParticipants(session, proyek);
+    }
+
+    @Override
+    public void checkUserAuthorizationForProyekFiles(Session session, String proyekId) {
+
+        Proyek proyek = proyekHelper.findProyekById(proyekId);
+        verifyParticipants(session, proyek);
+
+    }
+
+    private void verifyParticipants(Session session, Proyek proyek){
         List<String> partisipan = new ArrayList<>();
         partisipan.addAll(proyek.getPartisipan().getMitra());
         partisipan.addAll(proyek.getPartisipan().getPeneliti());

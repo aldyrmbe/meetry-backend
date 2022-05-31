@@ -79,4 +79,6 @@ public class Proyek {
     @Field
     private List<DokumenPendukung> dokumenKontrak;
 
+    @Field
+    private List<File> files;
 }
