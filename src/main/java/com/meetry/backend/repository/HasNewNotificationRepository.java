@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface HasNewNotificationRepository extends MongoRepository<HasNewNotification, String> {
+public interface HasNewNotificationRepository
+    extends MongoRepository<HasNewNotification, String>, HasNewNotificationRepositoryCustom {
 
 }

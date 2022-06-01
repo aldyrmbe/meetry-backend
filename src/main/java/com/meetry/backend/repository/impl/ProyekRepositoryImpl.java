@@ -36,6 +36,12 @@ public class ProyekRepositoryImpl implements ProyekRepositoryCustom {
     Query query = new Query();
     Query countQuery = new Query();
 
+    if(session.getRole().equals(Role.ERIC)){
+      Criteria criteria = Criteria.where("status").ne(StatusProyek.DALAM_PENGAJUAN);
+      query.addCriteria(criteria);
+      countQuery.addCriteria(criteria);
+    }
+
     if (Objects.nonNull(status)) {
       Criteria criteria = Criteria.where("status")
           .is(status);

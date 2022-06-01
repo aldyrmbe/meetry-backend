@@ -15,18 +15,26 @@ import org.springframework.stereotype.Controller;
 public class WebSocketController {
 
   private final SimpMessagingTemplate simpMessagingTemplate;
+
   private final HasNewNotificationRepository hasNewNotificationRepository;
 
   @MessageMapping("/clearNotification/{id}")
-  public void clearNewNotification(@DestinationVariable("id") String id){
-      HasNewNotification hasNewNotification = hasNewNotificationRepository.findById(id)
-          .orElseThrow(() -> new BaseException("Not found."));
-      hasNewNotification.setHasNewNotification(false);
-      hasNewNotificationRepository.save(hasNewNotification);
+  public void clearNewNotification(@DestinationVariable("id") String id) {
 
-      RealtimeNotificationWebSocketPayload payload = new RealtimeNotificationWebSocketPayload(false);
-      simpMessagingTemplate.convertAndSend(String.format("/notification/%s", id), payload);
+    HasNewNotification hasNewNotification = hasNewNotificationRepository.findById(id)
+        .orElseThrow(() -> new BaseException("Not found."));
+    hasNewNotification.setHasNewNotification(false);
+    hasNewNotificationRepository.save(hasNewNotification);
+
+    RealtimeNotificationWebSocketPayload payload = new RealtimeNotificationWebSocketPayload(false);
+    simpMessagingTemplate.convertAndSend(String.format("/notification/%s", id), payload);
   }
 
+  @MessageMapping("/openNotification/{userId}/{notificationId}")
+  public void openNotification(@DestinationVariable("userId") String userId,
+      @DestinationVariable("notificationId") String notificationId) {
+
+
+  }
 
 }

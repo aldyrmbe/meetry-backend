@@ -1,5 +1,6 @@
 package com.meetry.backend.config;
 
+import com.meetry.backend.command.CommandExecutor;
 import com.meetry.backend.entity.HasNewNotification;
 import com.meetry.backend.repository.HasNewNotificationRepository;
 import com.meetry.backend.web.model.request.RealtimeNotificationWebSocketPayload;
@@ -19,6 +20,8 @@ public class WebSocketEventListener {
   private final SimpMessagingTemplate simpMessagingTemplate;
 
   private final HasNewNotificationRepository hasNewNotificationRepository;
+
+  private final CommandExecutor commandExecutor;
 
   @EventListener
   public void handleInitialNotificationValue(SessionSubscribeEvent event) {
