@@ -1,17 +1,14 @@
 package com.meetry.backend.helper.impl;
 
-import com.meetry.backend.entity.Session;
 import com.meetry.backend.entity.constant.NotificationConstant;
 import com.meetry.backend.entity.constant.Role;
 import com.meetry.backend.entity.notifikasi.NotificationItem;
-import com.meetry.backend.entity.notifikasi.Notifikasi;
 import com.meetry.backend.entity.proyek.Partisipan;
 import com.meetry.backend.entity.proyek.Proyek;
 import com.meetry.backend.entity.user.Mitra;
 import com.meetry.backend.entity.user.Peneliti;
 import com.meetry.backend.helper.NotificationHelper;
 import com.meetry.backend.helper.ProyekHelper;
-import com.meetry.backend.repository.HasNewNotificationRepository;
 import com.meetry.backend.repository.NotificationRepository;
 import com.meetry.backend.repository.user.AccountOfficerRepository;
 import com.meetry.backend.repository.user.MitraRepository;
@@ -26,7 +23,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -43,8 +39,6 @@ public class NotificationHelperImpl implements NotificationHelper {
   private final ProyekHelper proyekHelper;
 
   private final SimpMessagingTemplate simpMessagingTemplate;
-
-  private final HasNewNotificationRepository hasNewNotificationRepository;
 
   @Override
   public void sendNotificationForProyekOnDiscussion(Proyek proyek) {
@@ -240,7 +234,7 @@ public class NotificationHelperImpl implements NotificationHelper {
 
   private void updateRealtimeNotification(String userId, NotificationItem notificationItem) {
     notificationRepository.saveNotification(userId, notificationItem);
-
+      System.out.println(userId);
     RealtimeNotificationWebSocketPayload payload = new RealtimeNotificationWebSocketPayload(true);
     simpMessagingTemplate.convertAndSend("/notification/" + userId, payload);
     simpMessagingTemplate.convertAndSend("/getLatestNotification/" + userId, notificationItem);

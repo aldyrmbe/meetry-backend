@@ -1,9 +1,7 @@
 package com.meetry.backend.config;
 
 import com.meetry.backend.command.CommandExecutor;
-import com.meetry.backend.entity.HasNewNotification;
 import com.meetry.backend.entity.notifikasi.Notifikasi;
-import com.meetry.backend.repository.HasNewNotificationRepository;
 import com.meetry.backend.repository.NotificationRepository;
 import com.meetry.backend.web.exception.BaseException;
 import com.meetry.backend.web.model.request.RealtimeNotificationWebSocketPayload;

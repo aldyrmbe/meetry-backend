@@ -55,10 +55,12 @@ public class NotificationRepositoryImpl implements NotificationRepositoryCustom 
         .collect(Collectors.toList());
 
     List<List<NotificationItem>> pages = getPages(content);
+    List<NotificationItem> pageContent = pages.isEmpty() ? Collections.emptyList() : pages.get(page);
+    int totalPages = pages.isEmpty() ? 0 : pages.size() - 1;
     return CustomPage.<NotificationItem>builder()
-        .content(pages.get(page))
+        .content(pageContent)
         .pageNumber(page)
-        .totalPages(pages.size() - 1)
+        .totalPages(totalPages)
         .build();
   }
 
@@ -91,6 +93,10 @@ public class NotificationRepositoryImpl implements NotificationRepositoryCustom 
 
   private <T> List<List<T>> getPages(Collection<T> content){
     if(Objects.isNull(content)){
+      return Collections.emptyList();
+    }
+
+    if(content.isEmpty()){
       return Collections.emptyList();
     }
 
