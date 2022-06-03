@@ -24,5 +24,7 @@ public class NotificationDataWebResponse {
         private Long createdAt;
         private String title;
         private String description;
+        private String redirectionUrl;
+        private boolean isOpened;
     }
 }

@@ -120,10 +120,12 @@ public class LogbookController {
   }
 
   @Authenticated
-  @RequestMapping(method = RequestMethod.POST, value = "/{proyekId}/{subFolderId}/{logbookId}/comment")
+  @RequestMapping(method = RequestMethod.POST, value = "/{proyekId}/{folderId}/{subFolderId}/{subFolderName}/{logbookId}/comment")
   public BaseResponse addComment(HttpServletRequest httpServletRequest,
       @PathVariable("proyekId") String proyekId,
+      @PathVariable("folderId") String folderId,
       @PathVariable("subFolderId") String subFolderId,
+      @PathVariable("subFolderName") String subFolderName,
       @PathVariable("logbookId") String logbookId,
       @RequestPart(value="content") String content,
       @RequestPart(value = "files", required = false) MultipartFile[] files) {
@@ -133,15 +135,14 @@ public class LogbookController {
     AddCommentCommandRequest commandRequest = AddCommentCommandRequest.builder()
         .session(session)
         .proyekId(proyekId)
+        .folderId(folderId)
         .subFolderId(subFolderId)
+        .subFolderName(subFolderName)
         .logbookId(logbookId)
         .content(content)
         .files(files)
         .build();
 
-    System.out.println(proyekId);
-    System.out.println(subFolderId);
-    System.out.println(logbookId);
     return commandExecutor.execute(AddCommentCommand.class, commandRequest);
   }
 

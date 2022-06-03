@@ -2,6 +2,12 @@ package com.meetry.backend.entity.constant;
 
 public class NotificationConstant {
 
+  public static String GENERAL_REDIRECTION_URL =
+      "/%s/kolaborasi?searchQuery=%s&proyekId=%s";
+
+  public static String NEW_COMMENT_NOTIFICATION_REDIRECTION_URL =
+      "/%s/kolaborasi?searchQuery=%s&tabIndex=2&proyekId=%s&folderId=%s&subFolderId=%s&subFolderName=%s";
+
   public static String ON_DISCUSSION_TITLE_PEMOHON_PENELITI = "Kami berhasil menemukan mitra untuk Anda";
 
   public static String ON_DISCUSSION_DESC_PEMOHON_PENELITI =
@@ -23,4 +29,9 @@ public class NotificationConstant {
 
   public static String ON_CLOSE_DESC =
       "Proyek Anda yang berjudul \"%s\" sudah ditutup oleh Account Officer. Lihat detailnya di halaman “Kolaborasi Saya”. Jika mengalami kendala, silakan hubungi kami.";
+
+  public static String NEW_COMMENT_TITLE = "Ada komentar baru di Logbook";
+
+  public static String NEW_COMMENT_DESC =
+      "%s menambahkan komentar baru di proyek yang berjudul \"%s\". Klik untuk melihat komentar tersebut.";
 }

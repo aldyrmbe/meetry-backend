@@ -158,6 +158,19 @@ public class UserController {
     return commandExecutor.execute(GetNotificationCommand.class, commandRequest);
   }
 
+  @Authenticated
+  @RequestMapping(method = RequestMethod.PUT, value = "/openNotification/{userId}/{notificationId}")
+  public void openNotification(HttpServletRequest httpServletRequest, @PathVariable("userId") String userId,
+      @PathVariable("notificationId") String notificationId) {
+
+    OpenNotificationCommandRequest commandRequest = OpenNotificationCommandRequest.builder()
+        .userId(userId)
+        .notificationId(notificationId)
+        .build();
+
+    commandExecutor.execute(OpenNotificationCommand.class, commandRequest);
+  }
+
   @Authenticated(value = {Role.ERIC})
   @RequestMapping(method = RequestMethod.GET, value = "/getListAccountOfficers")
   public DefaultResponse<GetAccountOfficerListWebResponse> getListAccountOfficers(

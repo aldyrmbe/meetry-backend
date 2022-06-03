@@ -6,7 +6,6 @@ import com.meetry.backend.entity.constant.StatusProyek;
 import com.meetry.backend.entity.proyek.File;
 import com.meetry.backend.entity.proyek.Proyek;
 import com.meetry.backend.repository.ProyekRepositoryCustom;
-import com.mongodb.client.result.UpdateResult;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -126,7 +125,6 @@ public class ProyekRepositoryImpl implements ProyekRepositoryCustom {
     Update filesToUpdate = new Update();
     filesToUpdate.push("files").each(files.toArray());
 
-    UpdateResult updateResult = mongoTemplate.updateFirst(query, filesToUpdate, Proyek.class);
-    System.out.println(updateResult.wasAcknowledged());
+    mongoTemplate.updateFirst(query, filesToUpdate, Proyek.class);
   }
 }

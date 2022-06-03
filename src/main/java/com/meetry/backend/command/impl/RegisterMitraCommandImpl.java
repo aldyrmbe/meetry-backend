@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meetry.backend.command.RegisterMitraCommand;
 import com.meetry.backend.command.model.RegisterMitraCommandRequest;
 import com.meetry.backend.entity.constant.Role;
+import com.meetry.backend.entity.notifikasi.Notifikasi;
 import com.meetry.backend.entity.user.Mitra;
 import com.meetry.backend.helper.ClientHelper;
 import com.meetry.backend.helper.model.ImgBBUploadResponse;
+import com.meetry.backend.repository.NotificationRepository;
 import com.meetry.backend.repository.user.MitraRepository;
 import com.meetry.backend.web.exception.BaseException;
 import com.meetry.backend.web.model.request.RegisterMitraWebRequest;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -31,6 +34,8 @@ public class RegisterMitraCommandImpl implements RegisterMitraCommand {
 
   private final ClientHelper clientHelper;
 
+  private final NotificationRepository notificationRepository;
+
   private static final String GET_UI_AVATARS = "https://ui-avatars.com/api/?name=";
 
   @Override
@@ -43,7 +48,8 @@ public class RegisterMitraCommandImpl implements RegisterMitraCommand {
     checkEmailAvailability(webRequest.getEmail());
     if (Objects.isNull(commandRequest.getFotoProfil())) {
       mitra.setFotoProfil(generateDefaultProfilePicture(webRequest.getNamaPerusahaan()));
-      mitraRepository.save(mitra);
+      Mitra savedMitra = mitraRepository.save(mitra);
+      initNotification(savedMitra.getId());
     } else {
       uploadProfilePicture(mitra, commandRequest.getFotoProfil());
     }
@@ -77,8 +83,19 @@ public class RegisterMitraCommandImpl implements RegisterMitraCommand {
         .jenisPerusahaan(request.getJenisPerusahaan())
         .nomorTelepon(request.getNomorTelepon())
         .profilSingkat(request.getProfilSingkat())
-        .website(Optional.ofNullable(request.getWebsite()).orElse(null))
+        .website(Optional.ofNullable(request.getWebsite())
+            .orElse(null))
         .build();
+  }
+
+  private void initNotification(String mitraId) {
+
+    Notifikasi notifikasi = Notifikasi.builder()
+        .userId(mitraId)
+        .items(new ArrayList<>())
+        .hasNewNotification(false)
+        .build();
+    notificationRepository.save(notifikasi);
   }
 
   private String generateDefaultProfilePicture(String name) {
@@ -95,6 +112,7 @@ public class RegisterMitraCommandImpl implements RegisterMitraCommand {
         .getImage()
         .getUrl();
     mitra.setFotoProfil(imageUrl);
-    mitraRepository.save(mitra);
+    Mitra savedMitra = mitraRepository.save(mitra);
+    initNotification(savedMitra.getId());
   }
 }

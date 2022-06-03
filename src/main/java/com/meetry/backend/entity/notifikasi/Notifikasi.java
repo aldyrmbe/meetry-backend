@@ -18,17 +18,11 @@ import java.util.List;
 public class Notifikasi {
 
     @Id
-    private String id;
+    private String userId;
 
     @Field
-    private Long createdAt;
+    private List<NotificationItem> items;
 
     @Field
-    private List<String> receiver;
-
-    @Field
-    private String title;
-
-    @Field
-    private String description;
+    private boolean hasNewNotification;
 }

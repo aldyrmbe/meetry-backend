@@ -1,40 +1,27 @@
 package com.meetry.backend.web;
 
-import com.meetry.backend.entity.HasNewNotification;
-import com.meetry.backend.repository.HasNewNotificationRepository;
-import com.meetry.backend.web.exception.BaseException;
-import com.meetry.backend.web.model.request.RealtimeNotificationWebSocketPayload;
+import com.meetry.backend.command.ClearNewNotificationBadgeCommand;
+import com.meetry.backend.command.CommandExecutor;
+import com.meetry.backend.command.model.ClearNewNotificationBadgeCommandRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
 @AllArgsConstructor
 public class WebSocketController {
 
-  private final SimpMessagingTemplate simpMessagingTemplate;
+  private final CommandExecutor commandExecutor;
 
-  private final HasNewNotificationRepository hasNewNotificationRepository;
+  @MessageMapping("/clearNotification/{userId}")
+  public void clearNewNotificationBadge(@DestinationVariable("userId") String userId) {
 
-  @MessageMapping("/clearNotification/{id}")
-  public void clearNewNotification(@DestinationVariable("id") String id) {
+    ClearNewNotificationBadgeCommandRequest commandRequest = ClearNewNotificationBadgeCommandRequest.builder()
+        .userId(userId)
+        .build();
 
-    HasNewNotification hasNewNotification = hasNewNotificationRepository.findById(id)
-        .orElseThrow(() -> new BaseException("Not found."));
-    hasNewNotification.setHasNewNotification(false);
-    hasNewNotificationRepository.save(hasNewNotification);
-
-    RealtimeNotificationWebSocketPayload payload = new RealtimeNotificationWebSocketPayload(false);
-    simpMessagingTemplate.convertAndSend(String.format("/notification/%s", id), payload);
-  }
-
-  @MessageMapping("/openNotification/{userId}/{notificationId}")
-  public void openNotification(@DestinationVariable("userId") String userId,
-      @DestinationVariable("notificationId") String notificationId) {
-
-
+    commandExecutor.execute(ClearNewNotificationBadgeCommand.class, commandRequest);
   }
 
 }

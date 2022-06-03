@@ -14,7 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class AddCommentCommandRequest {
     private Session session;
     private String proyekId;
+    private String folderId;
     private String subFolderId;
+    private String subFolderName;
     private String logbookId;
     private String content;
     private MultipartFile[] files;

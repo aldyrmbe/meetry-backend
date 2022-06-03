@@ -28,8 +28,7 @@ public class HasNewNotificationRepositoryImpl implements HasNewNotificationRepos
     Update update = new Update();
     update.pull("unopenedNotificationIds", notificationId);
 
-    UpdateResult updateResult = mongoTemplate.updateFirst(query, update, HasNewNotification.class);
-    System.out.println(updateResult.wasAcknowledged());
+    mongoTemplate.updateFirst(query, update, HasNewNotification.class);
   }
 
 

@@ -1,9 +1,11 @@
 package com.meetry.backend.helper.impl;
 
-import com.meetry.backend.entity.HasNewNotification;
+import com.meetry.backend.entity.Session;
 import com.meetry.backend.entity.constant.NotificationConstant;
 import com.meetry.backend.entity.constant.Role;
+import com.meetry.backend.entity.notifikasi.NotificationItem;
 import com.meetry.backend.entity.notifikasi.Notifikasi;
+import com.meetry.backend.entity.proyek.Partisipan;
 import com.meetry.backend.entity.proyek.Proyek;
 import com.meetry.backend.entity.user.Mitra;
 import com.meetry.backend.entity.user.Peneliti;
@@ -16,6 +18,8 @@ import com.meetry.backend.repository.user.MitraRepository;
 import com.meetry.backend.repository.user.PenelitiRepository;
 import com.meetry.backend.web.model.request.RealtimeNotificationWebSocketPayload;
 import lombok.AllArgsConstructor;
+import org.bson.types.ObjectId;
+import org.springframework.data.util.Pair;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -49,80 +53,133 @@ public class NotificationHelperImpl implements NotificationHelper {
     String accountOfficerName = getAccountOfficerName(proyek.getPartisipan()
         .getAccountOfficer());
 
-    List<String> penelitiIds = proyek.getPartisipan()
-        .getPeneliti();
-    List<String> mitraIds = proyek.getPartisipan()
-        .getMitra();
-    List<String> receiverIds = Stream.of(penelitiIds, mitraIds)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+    Pair<List<String>, List<String>> partisipan = getPartisipan(proyek.getPartisipan());
 
     if (Role.PENELITI.equals(proyek.getPemohon())) {
-      String mitraNames = getMitraNames(mitraIds);
+      String mitraNames = getMitraNames(partisipan.getSecond());
+      NotificationItem notificationItem = construct(NotificationConstant.ON_DISCUSSION_TITLE_PEMOHON_PENELITI,
+          String.format(NotificationConstant.ON_DISCUSSION_DESC_PEMOHON_PENELITI, mitraNames,
+              whatsappGroupLink, accountOfficerName),
+          String.format(NotificationConstant.GENERAL_REDIRECTION_URL, "peneliti",
+              proyek.getJudulProyek(), proyek.getId()));
 
-      Notifikasi notifikasi = Notifikasi.builder()
-          .receiver(Collections.singletonList(proyek.getPartisipan()
-              .getPeneliti()
-              .get(0)))
-          .createdAt(Instant.now()
-              .toEpochMilli())
-          .title(NotificationConstant.ON_DISCUSSION_TITLE_PEMOHON_PENELITI)
-          .description(String.format(NotificationConstant.ON_DISCUSSION_DESC_PEMOHON_PENELITI, mitraNames,
-              whatsappGroupLink, accountOfficerName))
-          .build();
-
-      notificationRepository.save(notifikasi);
+      partisipan.getFirst()
+          .forEach(penelitiId -> {
+            updateRealtimeNotification(penelitiId, notificationItem);
+          });
     }
 
     if (Role.MITRA.equals(proyek.getPemohon())) {
-      String penelitiNames = getPenelitiNames(penelitiIds);
+      String penelitiNames = getPenelitiNames(partisipan.getFirst());
+      NotificationItem notificationItem = construct(NotificationConstant.ON_DISCUSSION_TITLE_PEMOHON_MITRA,
+          String.format(NotificationConstant.ON_DISCUSSION_DESC_PEMOHON_MITRA, penelitiNames,
+              whatsappGroupLink, accountOfficerName),
+          String.format(NotificationConstant.GENERAL_REDIRECTION_URL, "mitra",
+              proyek.getJudulProyek(), proyek.getId()));
 
-      Notifikasi notifikasi = Notifikasi.builder()
-          .receiver(Collections.singletonList(proyek.getPartisipan()
-              .getMitra()
-              .get(0)))
-          .createdAt(Instant.now()
-              .toEpochMilli())
-          .title(NotificationConstant.ON_DISCUSSION_TITLE_PEMOHON_MITRA)
-          .description(String.format(NotificationConstant.ON_DISCUSSION_DESC_PEMOHON_MITRA, penelitiNames,
-              whatsappGroupLink, accountOfficerName))
-          .build();
-
-      notificationRepository.save(notifikasi);
+      partisipan.getSecond()
+          .forEach(mitraId -> {
+            updateRealtimeNotification(mitraId, notificationItem);
+          });
     }
-    updateRealtimeNotification(receiverIds);
   }
 
   @Override
   public void sendNotificationForProyekOnActive(Proyek proyek) {
 
-    List<String> penelitiIds = proyek.getPartisipan()
-        .getPeneliti();
-    List<String> mitraIds = proyek.getPartisipan()
-        .getMitra();
-    List<String> receiverIds = Stream.of(penelitiIds, mitraIds)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
-    Long createdAt = Instant.now()
-        .toEpochMilli();
-    String judulProyek = proyek.getJudulProyek();
+    Pair<List<String>, List<String>> partisipan = getPartisipan(proyek.getPartisipan());
 
-    Notifikasi notifikasiForPeneliti = Notifikasi.builder()
-        .receiver(penelitiIds)
-        .createdAt(createdAt)
-        .title(NotificationConstant.ON_ACTIVE_TITLE_RECEIVER_PENELITI)
-        .description(String.format(NotificationConstant.ON_ACTIVE_DESC, judulProyek))
-        .build();
+    partisipan.getFirst()
+        .forEach(penelitiId -> {
+          NotificationItem notificationItem = construct(NotificationConstant.ON_ACTIVE_TITLE_RECEIVER_PENELITI,
+              String.format(NotificationConstant.ON_ACTIVE_DESC, proyek.getJudulProyek()),
+              String.format(NotificationConstant.GENERAL_REDIRECTION_URL, "peneliti",
+                  proyek.getJudulProyek(), proyek.getId()));
 
-    Notifikasi notifikasiForMitra = Notifikasi.builder()
-        .receiver(mitraIds)
-        .createdAt(createdAt)
-        .title(NotificationConstant.ON_ACTIVE_TITLE_RECEIVER_MITRA)
-        .description(String.format(NotificationConstant.ON_ACTIVE_DESC, judulProyek))
-        .build();
+          updateRealtimeNotification(penelitiId, notificationItem);
+        });
 
-    notificationRepository.saveAll(Arrays.asList(notifikasiForPeneliti, notifikasiForMitra));
-    updateRealtimeNotification(receiverIds);
+    partisipan.getSecond()
+        .forEach(mitraId -> {
+          NotificationItem notificationItem = construct(NotificationConstant.ON_ACTIVE_TITLE_RECEIVER_MITRA,
+              String.format(NotificationConstant.ON_ACTIVE_DESC, proyek.getJudulProyek()),
+              String.format(NotificationConstant.GENERAL_REDIRECTION_URL, "mitra",
+                  proyek.getJudulProyek(), proyek.getId()));
+
+          updateRealtimeNotification(mitraId, notificationItem);
+        });
+  }
+
+  @Override
+  public void sendNotificationForClosingProyek(Proyek proyek) {
+
+    Pair<List<String>, List<String>> partisipan = getPartisipan(proyek.getPartisipan());
+
+    partisipan.getFirst()
+        .forEach(penelitiId -> {
+          NotificationItem notificationItem = construct(NotificationConstant.ON_CLOSE_TITLE,
+              String.format(NotificationConstant.ON_CLOSE_DESC, proyek.getJudulProyek()),
+              String.format(NotificationConstant.GENERAL_REDIRECTION_URL, "peneliti",
+                  proyek.getJudulProyek(), proyek.getId()));
+          updateRealtimeNotification(penelitiId, notificationItem);
+        });
+
+    partisipan.getSecond()
+        .forEach(mitraId -> {
+          NotificationItem notificationItem = construct(NotificationConstant.ON_CLOSE_TITLE,
+              String.format(NotificationConstant.ON_CLOSE_DESC, proyek.getJudulProyek()),
+              String.format(NotificationConstant.GENERAL_REDIRECTION_URL, "mitra",
+                  proyek.getJudulProyek(), proyek.getId()));
+          updateRealtimeNotification(mitraId, notificationItem);
+        });
+  }
+
+  @Override
+  public void sendNotificationOnNewComment(String proyekId, String commentatorId, String commentatorName,
+      String folderId, String subFolderId, String subFolderName) {
+
+    Proyek proyek = proyekHelper.findProyekById(proyekId);
+    Pair<List<String>, List<String>> partisipan = getPartisipan(proyek.getPartisipan());
+
+    partisipan.getFirst()
+        .stream()
+        .filter(penelitiId -> !penelitiId.equals(commentatorId))
+        .forEach(penelitiId -> {
+          NotificationItem notificationItem = construct(
+              NotificationConstant.NEW_COMMENT_TITLE,
+              String.format(NotificationConstant.NEW_COMMENT_DESC, commentatorName, proyek.getJudulProyek()),
+              String.format(
+                  NotificationConstant.NEW_COMMENT_NOTIFICATION_REDIRECTION_URL,
+                  "peneliti",
+                  proyek.getJudulProyek(),
+                  proyek.getId(),
+                  folderId,
+                  subFolderId,
+                  subFolderName)
+          );
+
+          updateRealtimeNotification(penelitiId, notificationItem);
+        });
+
+    partisipan.getSecond()
+        .stream()
+        .filter(mitraId -> !mitraId.equals(commentatorId))
+        .forEach(mitraId -> {
+          NotificationItem notificationItem = construct(
+              NotificationConstant.NEW_COMMENT_TITLE,
+              String.format(NotificationConstant.NEW_COMMENT_DESC, commentatorName, proyek.getJudulProyek()),
+              String.format(
+                  NotificationConstant.NEW_COMMENT_NOTIFICATION_REDIRECTION_URL,
+                  "mitra",
+                  proyek.getJudulProyek(),
+                  proyek.getId(),
+                  folderId,
+                  subFolderId,
+                  subFolderName)
+          );
+
+          updateRealtimeNotification(mitraId, notificationItem);
+        });
   }
 
   private String getAccountOfficerName(String accountOfficerId) {
@@ -160,50 +217,32 @@ public class NotificationHelperImpl implements NotificationHelper {
     return proyekHelper.getFormattedNames(penelitiNames);
   }
 
-  @Override
-  public void sendNotificationForClosingProyek(Proyek proyek) {
+  private NotificationItem construct(String title, String description, String redirectionUrl) {
 
-    List<String> receiverIds = new ArrayList<>();
-    receiverIds.addAll(proyek.getPartisipan()
-        .getPeneliti());
-    receiverIds.addAll(proyek.getPartisipan()
-        .getMitra());
-    Long createdAt = Instant.now()
-        .toEpochMilli();
-    String judulProyek = proyek.getJudulProyek();
-
-    Notifikasi notifikasi = Notifikasi.builder()
-        .receiver(receiverIds)
-        .createdAt(createdAt)
-        .title(NotificationConstant.ON_CLOSE_TITLE)
-        .description(String.format(NotificationConstant.ON_CLOSE_DESC, judulProyek))
+    return NotificationItem.builder()
+        .id(new ObjectId().toString())
+        .title(title)
+        .description(description)
+        .createdAt(Instant.now()
+            .toEpochMilli())
+        .isOpened(false)
+        .redirectionUrl(redirectionUrl)
         .build();
-
-    notificationRepository.save(notifikasi);
-    updateRealtimeNotification(receiverIds);
   }
 
-  private void updateRealtimeNotification(List<String> userIds) {
+  private Pair<List<String>, List<String>> getPartisipan(Partisipan partisipan) {
 
-    userIds.forEach(userId -> {
-      updateRealtimeNotification(userId);
-      updateHasNewNotification(userId);
-    });
+    List<String> penelitiIds = partisipan.getPeneliti();
+    List<String> mitraIds = partisipan.getMitra();
+
+    return Pair.of(penelitiIds, mitraIds);
   }
 
-  private void updateRealtimeNotification(String userId) {
+  private void updateRealtimeNotification(String userId, NotificationItem notificationItem) {
+    notificationRepository.saveNotification(userId, notificationItem);
 
     RealtimeNotificationWebSocketPayload payload = new RealtimeNotificationWebSocketPayload(true);
     simpMessagingTemplate.convertAndSend("/notification/" + userId, payload);
-  }
-
-  private void updateHasNewNotification(String userId) {
-
-    HasNewNotification hasNewNotification = HasNewNotification.builder()
-        .userId(userId)
-        .hasNewNotification(true)
-        .build();
-
-    hasNewNotificationRepository.save(hasNewNotification);
+    simpMessagingTemplate.convertAndSend("/getLatestNotification/" + userId, notificationItem);
   }
 }

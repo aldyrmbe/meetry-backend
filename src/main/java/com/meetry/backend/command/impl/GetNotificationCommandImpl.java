@@ -2,14 +2,14 @@ package com.meetry.backend.command.impl;
 
 import com.meetry.backend.command.GetNotificationCommand;
 import com.meetry.backend.command.model.GetNotificationCommandRequest;
-import com.meetry.backend.entity.notifikasi.Notifikasi;
+import com.meetry.backend.entity.CustomPage;
+import com.meetry.backend.entity.notifikasi.NotificationItem;
 import com.meetry.backend.repository.NotificationRepository;
 import com.meetry.backend.web.model.response.DefaultResponse;
 import com.meetry.backend.web.model.response.NotificationDataWebResponse;
 import com.meetry.backend.web.model.response.PaginationData;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,26 +31,29 @@ public class GetNotificationCommandImpl implements GetNotificationCommand {
         .build();
   }
 
-  private Page<Notifikasi> getNotificationByUserId(GetNotificationCommandRequest commandRequest) {
+  private CustomPage<NotificationItem> getNotificationByUserId(GetNotificationCommandRequest commandRequest) {
 
-    return notificationRepository.getAllByReceiverContainingOrderByCreatedAtDesc(commandRequest.getSession()
-        .getId(), PageRequest.of(commandRequest.getPage(), 5));
+    return notificationRepository.getNotificationPage(commandRequest.getSession()
+        .getId(), commandRequest.getPage());
   }
 
   private NotificationDataWebResponse toNotificationDataWebResponse(
       GetNotificationCommandRequest commandRequest) {
 
-    Page<Notifikasi> notificationPage = getNotificationByUserId(commandRequest);
-    List<NotificationDataWebResponse.NotificationData> notifications = notificationPage.getContent().stream()
+    CustomPage<NotificationItem> notificationPage = getNotificationByUserId(commandRequest);
+    List<NotificationDataWebResponse.NotificationData> notifications = notificationPage.getContent()
+        .stream()
         .map(notification -> NotificationDataWebResponse.NotificationData.builder()
             .id(notification.getId())
             .createdAt(notification.getCreatedAt())
             .title(notification.getTitle())
             .description(notification.getDescription())
+            .redirectionUrl(notification.getRedirectionUrl())
+            .isOpened(notification.isOpened())
             .build())
         .collect(Collectors.toList());
     PaginationData paginationData = PaginationData.builder()
-        .currentPage(notificationPage.getPageable().getPageNumber() + 1)
+        .currentPage(notificationPage.getPageNumber())
         .totalPage(notificationPage.getTotalPages())
         .build();
 

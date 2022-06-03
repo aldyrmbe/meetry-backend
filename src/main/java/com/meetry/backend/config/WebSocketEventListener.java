@@ -2,7 +2,10 @@ package com.meetry.backend.config;
 
 import com.meetry.backend.command.CommandExecutor;
 import com.meetry.backend.entity.HasNewNotification;
+import com.meetry.backend.entity.notifikasi.Notifikasi;
 import com.meetry.backend.repository.HasNewNotificationRepository;
+import com.meetry.backend.repository.NotificationRepository;
+import com.meetry.backend.web.exception.BaseException;
 import com.meetry.backend.web.model.request.RealtimeNotificationWebSocketPayload;
 import lombok.AllArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -19,7 +22,7 @@ public class WebSocketEventListener {
 
   private final SimpMessagingTemplate simpMessagingTemplate;
 
-  private final HasNewNotificationRepository hasNewNotificationRepository;
+  private final NotificationRepository notificationRepository;
 
   private final CommandExecutor commandExecutor;
 
@@ -42,13 +45,9 @@ public class WebSocketEventListener {
 
   private boolean hasLatestNotification(String userId) {
 
-    HasNewNotification hasNewNotification = hasNewNotificationRepository.findById(userId)
-        .orElse(null);
+    Notifikasi notifikasi = notificationRepository.findById(userId)
+        .orElseThrow(() -> new BaseException("Notifikasi tidak ditemukan"));
 
-    if (Objects.isNull(hasNewNotification)) {
-      return false;
-    }
-
-    return hasNewNotification.isHasNewNotification();
+    return notifikasi.isHasNewNotification();
   }
 }

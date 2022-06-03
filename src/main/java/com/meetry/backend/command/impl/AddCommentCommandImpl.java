@@ -12,6 +12,7 @@ import com.meetry.backend.entity.user.Mitra;
 import com.meetry.backend.entity.user.Peneliti;
 import com.meetry.backend.helper.AuthHelper;
 import com.meetry.backend.helper.ClientHelper;
+import com.meetry.backend.helper.NotificationHelper;
 import com.meetry.backend.helper.model.GoFileUploadResponse;
 import com.meetry.backend.repository.KomentarRepository;
 import com.meetry.backend.repository.ProyekRepository;
@@ -50,6 +51,8 @@ public class AddCommentCommandImpl implements AddCommentCommand {
 
   private final ProyekRepository proyekRepository;
 
+  private final NotificationHelper notificationHelper;
+
   @Override
   public BaseResponse execute(AddCommentCommandRequest commandRequest) {
 
@@ -77,17 +80,25 @@ public class AddCommentCommandImpl implements AddCommentCommand {
       proyekRepository.saveFiles(commandRequest.getProyekId(), filesToSave);
     }
 
+    Pair<String, String> sender = getSender(commandRequest.getSession());
     Komentar comment = Komentar.builder()
         .logbookId(commandRequest.getLogbookId())
         .createdAt(Instant.now()
             .toEpochMilli())
-        .senderName(getSender(commandRequest.getSession()).getFirst())
-        .profilePhoto(getSender(commandRequest.getSession()).getSecond())
+        .senderName(sender.getFirst())
+        .profilePhoto(sender.getSecond())
         .content(commandRequest.getContent())
         .files(files)
         .build();
-
     komentarRepository.save(comment);
+    notificationHelper.sendNotificationOnNewComment(
+        commandRequest.getProyekId(),
+        commandRequest.getSession().getId(),
+        sender.getFirst(),
+        commandRequest.getFolderId(),
+        commandRequest.getSubFolderId(),
+        commandRequest.getSubFolderName()
+    );
   }
 
   private Pair<String, String> getSender(Session session) {
