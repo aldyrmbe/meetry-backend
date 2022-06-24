@@ -35,17 +35,22 @@ public class ProyekRepositoryImpl implements ProyekRepositoryCustom {
     Query query = new Query();
     Query countQuery = new Query();
 
-    if(session.getRole().equals(Role.ERIC)){
-      Criteria criteria = Criteria.where("status").ne(StatusProyek.DALAM_PENGAJUAN);
-      query.addCriteria(criteria);
-      countQuery.addCriteria(criteria);
-    }
-
     if (Objects.nonNull(status)) {
-      Criteria criteria = Criteria.where("status")
-          .is(status);
+      Criteria criteria = null;
+      if(Role.ERIC.equals(session.getRole())){
+        Criteria statusCriteria = Criteria.where("status").ne(StatusProyek.DALAM_PENGAJUAN);
+        criteria = Criteria.where("status").is(status).andOperator(statusCriteria);
+      } else {
+        criteria = Criteria.where("status").is(status);
+      }
       query.addCriteria(criteria);
       countQuery.addCriteria(criteria);
+    } else {
+      if(session.getRole().equals(Role.ERIC)){
+        Criteria criteria = Criteria.where("status").ne(StatusProyek.DALAM_PENGAJUAN);
+        query.addCriteria(criteria);
+        countQuery.addCriteria(criteria);
+      }
     }
 
     if (Role.PENELITI.equals(session.getRole())) {
