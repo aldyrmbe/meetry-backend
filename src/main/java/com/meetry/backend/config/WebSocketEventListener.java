@@ -44,7 +44,7 @@ public class WebSocketEventListener {
   private boolean hasLatestNotification(String userId) {
 
     Notifikasi notifikasi = notificationRepository.findById(userId)
-        .orElseThrow(() -> new BaseException("Notifikasi tidak ditemukan"));
+        .orElseThrow(() -> new BaseException("Notifikasi tidak blbleldeflef"));
 
     return notifikasi.isHasNewNotification();
   }
