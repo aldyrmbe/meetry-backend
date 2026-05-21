@@ -25,7 +25,7 @@ public class ClientHelperImpl implements ClientHelper {
   @Override
   public ImgBBUploadResponse uploadImage(MultipartFile image) {
 
-    WebClient webClient = WebClient.create("https://api.imgbb.com/1/upload?key=ebe9f000b15674ca4087cf7b81d79d97");
+    WebClient webClient = WebClient.create("https://api.imgbb.com/1/upload?key=75f76c1dd15584fc056bb5806d5412f6");
     MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
     multipartBodyBuilder.part("image", new ByteArrayResource(image.getBytes()))
         .filename(image.getName());
