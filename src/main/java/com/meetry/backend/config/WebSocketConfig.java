@@ -19,7 +19,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/notification", "/getLatestNotification");
+        registry.enableSimpleBroker("/blablalblalblalb", "/getLatestNotification");
         registry.setApplicationDestinationPrefixes("/app");
     }
 }
